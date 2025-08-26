@@ -5,13 +5,57 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta http-equiv="x-ua-compatible" content="IE=10">
 <title></title>
-<style type="text/css">#initialLoading{background:url(assets/htmlimages/loader.gif) no-repeat center center;background-color:#ffffff;position:absolute;margin:auto;top:0;left:0;right:0;bottom:0;z-index:10010;}</style>
 
-"
-"
+<!-- Make the loader background black -->
+<style type="text/css">
+  #initialLoading{
+    background:url(assets/htmlimages/loader.gif) no-repeat center center;
+    background-color:#000000; /* was #ffffff */
+    position:absolute;margin:auto;top:0;left:0;right:0;bottom:0;z-index:10010;
+  }
+</style>
+
+<!-- Kill white seam on the right & ensure all wrappers are black -->
+<style>
+  /* Remove any white behind the stage and prevent scrollbars */
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #000 !important;
+    overflow: hidden;
+  }
+
+  /* Captivate wrappers often set their own backgrounds – force them to black */
+  .cpMainContainer,
+  #cpDocument,
+  #main_container,
+  #projectBorder,
+  #project_container,
+  #project,
+  #project_main,
+  #div_Slide,
+  #toc,
+  #playbar,
+  .loadingBackground,
+  #blockUserInteraction {
+    background: #000 !important;
+  }
+
+  /* Safety net: paint a 1px black strip on the extreme right to hide any sub-pixel gap */
+  body::after{
+    content:"";
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 1px;
+    background: #000;
+    pointer-events: none;
+  }
+
+  /* Make loading text visible on black */
+  #loadingString { color:#fff !important; }
+</style>
 
 <script>
-
 var deviceReady = false;
 var initCalled = false ;
 var initialized = false;
@@ -100,66 +144,64 @@ function initializeCP()
 		setInterval(isLivePreviewDirty, 1000);
 	}
 }
-
 </script>
 
- </head>
+</head>
 <body onload="onBodyLoad()">
-		<div id='initialLoading'></div>
+	<div id='initialLoading'></div>
 <script>
-		(function()
+	(function()
+	{
+		if(document.documentMode < 9)
 		{
-			if(document.documentMode < 9)
-			{
-				document.body.innerHTML = "";
-				document.write("The content you are trying to view is not supported in the current Document Mode of Internet Explorer. Change the Document Mode to Internet Explorer 9 Standards and try to view the content again.<br>To change the Document Mode, press F12, click Document Mode: <current mode>, and then select Internet Explorer 9 Standards.");
-				return;
-			}
-			window.addEventListener("load",function() 
-			{
-				setTimeout(function() 
-				{					
-					var script = document.createElement('script');
-					script.type = 'text/javascript';
-					script.src = 'assets/js/CPXHRLoader.js';
-					script.defer = 'defer';
-					script.onload = function()
+			document.body.innerHTML = "";
+			document.write("The content you are trying to view is not supported in the current Document Mode of Internet Explorer. Change the Document Mode to Internet Explorer 9 Standards and try to view the content again.<br>To change the Document Mode, press F12, click Document Mode: <current mode>, and then select Internet Explorer 9 Standards.");
+			return;
+		}
+		window.addEventListener("load",function() 
+		{
+			setTimeout(function() 
+			{					
+				var script = document.createElement('script');
+				script.type = 'text/javascript';
+				script.src = 'assets/js/CPXHRLoader.js';
+				script.defer = 'defer';
+				script.onload = function()
+				{
+					var lCSSLoaded = false;
+					var lJSLoaded = false;
+					function constructDIVs()
 					{
-						var lCSSLoaded = false;
-						var lJSLoaded = false;
-						function constructDIVs()
+						if(lCSSLoaded && lJSLoaded)
 						{
-							if(lCSSLoaded && lJSLoaded)
-							{
-								initializeCP();
-							}
+							initializeCP();
 						}
-						cpXHRJSLoader.css('assets/css/CPLibraryAll.css',function() {
-							lCSSLoaded = true;
-							constructDIVs();
-						});
-						var lJSFiles = [  'assets/js/jquery-3.3.1.min.js','assets/js/CPM.js' ];
-						cpXHRJSLoader.js(lJSFiles,function()
-						{
-							//console.log("js loaded");
-
-							var imagesJSONFiles = [ 'dr/imgmd.json' ];
-							cpXHRJSLoader.loadImagesJSON(imagesJSONFiles,function(imageToJSONPathMap){
-								cp.imageToJSONPathMap = imageToJSONPathMap;
-								var imageJSONFiles = [ 'dr/img1.json','dr/img2.json','dr/img3.json','dr/img4.json' ];
-								if(window.location.protocol.substr(0,4) == "file")
-									cpXHRJSLoader.preloadURLs(imageJSONFiles, constructDIVs);
-								lJSLoaded = true;
-								if(window.location.protocol.substr(0,4) != "file" || !imageJSONFiles.length)
-									constructDIVs();
-							});
-						});
 					}
-					document.getElementsByTagName('head')[0].appendChild(script);
-				},1);
-			},false);
-		})();
-		
+					cpXHRJSLoader.css('assets/css/CPLibraryAll.css',function() {
+						lCSSLoaded = true;
+						constructDIVs();
+					});
+					var lJSFiles = [  'assets/js/jquery-3.3.1.min.js','assets/js/CPM.js' ];
+					cpXHRJSLoader.js(lJSFiles,function()
+					{
+						//console.log("js loaded");
+
+						var imagesJSONFiles = [ 'dr/imgmd.json' ];
+						cpXHRJSLoader.loadImagesJSON(imagesJSONFiles,function(imageToJSONPathMap){
+							cp.imageToJSONPathMap = imageToJSONPathMap;
+							var imageJSONFiles = [ 'dr/img1.json','dr/img2.json','dr/img3.json','dr/img4.json' ];
+							if(window.location.protocol.substr(0,4) == "file")
+								cpXHRJSLoader.preloadURLs(imageJSONFiles, constructDIVs);
+							lJSLoaded = true;
+							if(window.location.protocol.substr(0,4) != "file" || !imageJSONFiles.length)
+								constructDIVs();
+						});
+					});
+				}
+				document.getElementsByTagName('head')[0].appendChild(script);
+			},1);
+		},false);
+	})();
 </script>
 <noscript style="text-align:center;font-size:24px;">Enable Javascript support in the browser.</noscript>
 </body>
